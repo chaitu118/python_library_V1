@@ -1,60 +1,91 @@
 ---
 services:
   db:
-    image: shaikmustafa/arshad:db
-    deploy:
-      replicas: 1
+    image: krishnadevops118/python_library_dbimage
     ports:
       - "3306:3306"
+    deploy:
+      replicas: 2  
+    volumes:
+      - mydata:/var/lib/mysql/
     networks:
-      - mynetwork
+      - network1
 
   auth_service:
-    image: shaikmustafa/arshad:auth
-    deploy:
-      replicas: 1
+    image: krishnadevops118/python_library_authimage
     ports:
       - "5001:5001"
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 200M
+        limits:
+          cpus: "0.5"
+          memory: 300M  
     networks:
-      - mynetwork
+      - network1
     depends_on:
       - db
-    
 
   book_service:
-    image: shaikmustafa/arshad:book
-    deploy:
-      replicas: 1
+    image: krishnadevops118/python_library_bookimage
     ports:
       - "5002:5002"
-    networks:
-      - mynetwork
-    depends_on:
-      - db
-  borrow_service:
-    image: shaikmustafa/arshad:borrow
     deploy:
-      replicas: 1
+      replicas: 2
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 200M
+        limits:
+          cpus: "0.5"
+          memory: 300M  
+    networks:
+      - network1
+    depends_on:
+      - db  
+
+  borrow_service:
+    image: krishnadevops118/python_library_borrowimage
     ports:
       - "5003:5003"
-    networks:
-      - mynetwork
-    depends_on:
-      - db
-
-  frontend:
-    image: shaikmustafa/arshad:frontend
     deploy:
-      replicas: 1
+      replicas: 2
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 200M
+        limits:
+          cpus: "0.5"
+          memory: 300M  
+    networks:
+      - network1
+    depends_on:
+      - db    
+      
+  frontend:
+    image: krishnadevops118/python_library_appimage
     ports:
       - "5000:5000"
     networks:
-      - mynetwork
+      - network1
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 200M  
     depends_on:
       - auth_service
       - book_service
-      - borrow_service
+      - borrow_service   
+
 
 networks:
-  mynetwork:
-    driver: bridge
+  network1:
+    driver: overlay
+volumes:
+  mydata:  
+...
